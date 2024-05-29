@@ -3,11 +3,12 @@
   <v-row>
     <v-col cols="12">
       <v-text-field
-        v-model="newLootItem.title"
-        label="Add new item"
+        v-model="newItem.title"
+        label="Search or add new item"
         type="text"
         variant="outlined"
         clearable
+        :hide-details="true"
       >
         <template v-slot:append-inner>
           <v-fade-transition leave-absolute>
@@ -19,48 +20,74 @@
             ></v-progress-circular>
           </v-fade-transition>
         </template>
-
-        <template v-slot:append>
-          <v-col cols="auto">
-            <v-autocomplete
-              :items="brands"
-              v-model="newLootItem.brandId"
-              :hide-details="true"
-            >
-              <template #no-data>
-                <v-btn
-                  class="ma-4"
-                  variant="text"
-                  block
-                  color="success"
-                  >Add</v-btn
-                >
-              </template>
-            </v-autocomplete>
-          </v-col>
-          <v-col cols="auto">
-            <v-btn
-              :disabled="!!!newLootItem.title"
-              icon="mdi-plus"
-              color="green-accent-4"
-            ></v-btn>
-          </v-col>
-        </template>
       </v-text-field>
+    </v-col>
+    <v-col cols="12" class="mb-6">
+      <v-row align="center">
+        <v-col cols="12" md="4">
+          <v-autocomplete
+            label="Brand"
+            variant="outlined"
+            :items="brands"
+            v-model="newItem.brandId"
+            :hide-details="true"
+            item-value="id"
+            item-title="title"
+          >
+            <template #no-data>
+              <v-btn class="ma-4" variant="text" block color="success">Add</v-btn>
+            </template>
+          </v-autocomplete>
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-text-field
+            variant="outlined"
+            label="Price"
+            placeholder="Price"
+            type="number"
+            :hide-details="true"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-text-field
+            variant="outlined"
+            label="Qunatity"
+            placeholder="Qunatity"
+            type="number"
+            :hide-details="true"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" md="2">
+          <div class="d-flex align-center justify-end">
+            <v-btn
+              v-if="newItem.edit"
+              icon="mdi-close"
+              class="ml-4"
+              @click="onClear"
+            ></v-btn>
+            <v-btn
+              :disabled="!!!newItem.title"
+              :icon="newItem.edit ? 'mdi-check' : 'mdi-plus'"
+              :color="newItem.edit ? 'orange-accent-3' : 'green-accent-4'"
+              class="ml-4"
+            ></v-btn>
+          </div>
+        </v-col>
+      </v-row>
     </v-col>
   </v-row>
   <!-- list -->
   <v-list lines="one">
     <v-list-item
-      v-for="item in lootList"
+      v-for="item in filteredList"
       :key="item.id"
       :title="item.title"
       :subtitle="item.subtitle"
       :value="item.id"
     >
-      <template #prepend="{ isActive }">
+      <template #prepend="{}">
         <v-list-item-action start>
-          <v-checkbox-btn :model-value="isActive"></v-checkbox-btn>
+          <v-checkbox-btn v-model="item.isActive"></v-checkbox-btn>
         </v-list-item-action>
       </template>
       <v-list-item-title>{{ item.title }}</v-list-item-title>
@@ -70,7 +97,11 @@
       <template v-slot:append="{ isActive }">
         <v-list-item-action end>
           <v-col cols="auto">
-            <v-btn icon="mdi-pencil"></v-btn>
+            <v-btn
+              color="orange-accent-3"
+              icon="mdi-pencil"
+              @click.stop="onEditEnable(item)"
+            ></v-btn>
           </v-col>
           <v-col cols="auto">
             <v-btn
@@ -103,46 +134,35 @@
 </template>
 
 <script lang="ts" setup>
-const newLootItem = ref({
+import { useListStore } from "@/stores/list";
+
+const store = useListStore();
+
+const { list, brands } = store;
+
+const newItem = ref({
   title: "",
   subtitle: "",
-  brandId: 0,
+  brandId: null,
+  edit: false,
+  isActive: false,
 });
-const brands = computed(() => [
-  {
-    id: 1,
-    title: "Brand 1",
-  },
-  {
-    id: 2,
-    title: "Brand 2",
-  },
-  {
-    id: 3,
-    title: "Brand 3",
-  },
-]);
-const lootList = computed(() => [
-  {
-    id: 1,
-    title: "Item 1",
-    subtitle: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-    isActive: false,
-  },
-  {
-    id: 2,
-    title: "Item 2",
-    subtitle: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-    isActive: true,
-  },
-  {
-    id: 3,
-    title: "Item 3",
-    subtitle: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-    isActive: false,
-  },
-]);
+
+const filteredList = computed(() =>
+  !!!newItem.value.title || newItem.value.edit
+    ? list
+    : list.filter((item) =>
+        item.title.toLowerCase().includes(newItem.value.title.toLowerCase())
+      )
+);
 const deleteItem = ref();
+
+const onClear = () => {
+  newItem.value = { title: "", subtitle: "", brandId: null, edit: false };
+};
+const onEditEnable = (item) => {
+  newItem.value = { ...item, brandId: item.brandId, edit: true };
+};
 const onDeleteConfirmDialog = (item) => {
   deleteItem.value = item;
 };
