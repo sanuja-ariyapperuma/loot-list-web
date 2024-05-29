@@ -1,0 +1,18 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20.11.1
+    commands:
+      - echo "Installing NPM dependencies..."
+      - npm install --global yarn
+      - yarn --version
+      - yarn install
+  build:
+    commands:
+      - echo "Building vue application..."
+      - yarn build
+  post_build:
+    commands:
+      - echo "Updating files in S3..."
+      - aws s3 sync dist/ s3://lootlist-webapp --delete
