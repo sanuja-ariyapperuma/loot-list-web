@@ -107,5 +107,6 @@ export const useListStore = defineStore('list', () => {
       title: "Keells",
     },
   ])
-  return { list, brands }
+  const categories = ref(["cleaning", "kitchen", "bathroom", "laundry"])
+  return { list, brands, categories }
 })

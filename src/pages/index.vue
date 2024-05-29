@@ -22,9 +22,9 @@
         </template>
       </v-text-field>
     </v-col>
-    <v-col cols="12" class="mb-6">
+    <v-col cols="12">
       <v-row align="center">
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="3">
           <v-autocomplete
             label="Brand"
             variant="outlined"
@@ -57,45 +57,72 @@
             :hide-details="true"
           ></v-text-field>
         </v-col>
-        <v-col cols="12" md="2">
-          <div class="d-flex align-center justify-end">
-            <v-btn
-              v-if="newItem.edit"
-              icon="mdi-close"
-              class="ml-4"
-              @click="onClear"
-            ></v-btn>
-            <v-btn
-              :disabled="!!!newItem.title"
-              :icon="newItem.edit ? 'mdi-check' : 'mdi-plus'"
-              :color="newItem.edit ? 'orange-accent-3' : 'green-accent-4'"
-              class="ml-4"
-            ></v-btn>
-          </div>
+        <v-col cols="12" md="3">
+          <v-combobox
+            v-model="newItem.categories"
+            :items="categories"
+            variant="outlined"
+            label="Tags"
+            chips
+            multiple
+            :hide-details="true"
+          ></v-combobox>
         </v-col>
       </v-row>
+    </v-col>
+    <v-col cols="12" class="mb-6">
+      <div class="d-flex align-center justify-end">
+        <v-btn
+          v-if="newItem.edit"
+          class="mr-4 text-none"
+          prepend-icon="mdi-close"
+          variant="text"
+          size="large"
+          border
+          @click="onClear"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          class="text-none flex-grow-1 mr-4"
+          :disabled="!!!newItem.title"
+          :color="newItem.edit ? 'orange-accent-3' : 'green-accent-4'"
+          :prepend-icon="newItem.edit ? 'mdi-check' : 'mdi-plus'"
+          variant="flat"
+          size="large"
+        >
+          {{ newItem.edit ? "Update" : "Add" }}
+        </v-btn>
+        <v-switch
+          color="success"
+          v-model="isEdit"
+          label="Edit mode"
+          hide-details
+          inset
+        ></v-switch>
+      </div>
     </v-col>
   </v-row>
   <!-- list -->
   <v-list lines="one">
-    <v-list-item
-      v-for="item in filteredList"
-      :key="item.id"
-      :title="item.title"
-      :subtitle="item.subtitle"
-      :value="item.id"
-    >
+    <v-list-item v-for="item in filteredList" :key="item.id" :value="item.id">
       <template #prepend="{}">
-        <v-list-item-action start>
+        <v-list-item-action start class="list-item">
           <v-checkbox-btn v-model="item.isActive"></v-checkbox-btn>
         </v-list-item-action>
       </template>
       <v-list-item-title>{{ item.title }}</v-list-item-title>
-      <v-list-item-subtitle>
-        {{ item.subtitle }}
-      </v-list-item-subtitle>
+      <v-list-tile-sub-title>
+        <v-chip class="mr-2" color="pink" label>
+          <v-icon icon="mdi-shape" start></v-icon>
+          {{brands.find((brand) => brand.id === item.brandId).title}}
+        </v-chip>
+        <v-chip v-for="tag in item.tags" :key="tag" class="mr-2" color="primary">
+          {{ tag }}
+        </v-chip>
+      </v-list-tile-sub-title>
       <template v-slot:append="{ isActive }">
-        <v-list-item-action end>
+        <v-list-item-action v-if="isEdit" end>
           <v-col cols="auto">
             <v-btn
               color="orange-accent-3"
@@ -138,27 +165,33 @@ import { useListStore } from "@/stores/list";
 
 const store = useListStore();
 
-const { list, brands } = store;
+const { list, brands, categories } = store;
 
 const newItem = ref({
   title: "",
-  subtitle: "",
   brandId: null,
   edit: false,
   isActive: false,
+  categories: [],
 });
 
 const filteredList = computed(() =>
+  // eslint-disable-next-line no-extra-boolean-cast
   !!!newItem.value.title || newItem.value.edit
     ? list
     : list.filter((item) =>
         item.title.toLowerCase().includes(newItem.value.title.toLowerCase())
       )
 );
+
 const deleteItem = ref();
 
+const isEdit = ref(false);
+
+const tagColours = computed(() => ["indigo", "green", "red", "blue", "orange"]);
+
 const onClear = () => {
-  newItem.value = { title: "", subtitle: "", brandId: null, edit: false };
+  newItem.value = { title: "", brandId: null, edit: false };
 };
 const onEditEnable = (item) => {
   newItem.value = { ...item, brandId: item.brandId, edit: true };
@@ -170,3 +203,9 @@ const onDeleteConfirm = (item) => {
   deleteItem.value = undefined;
 };
 </script>
+
+<style lang="scss" scoped>
+.list-item {
+  min-height: 5rem;
+}
+</style>
