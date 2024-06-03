@@ -195,7 +195,6 @@ const onClear = () => {
 };
 const onEditEnable = (item) => {
   newItem.value = { ...item, brandId: item.brandId, edit: true };
-  console.log('new item: ', newItem.value)
 };
 const onDeleteConfirmDialog = (item) => {
   deleteItem.value = item;
