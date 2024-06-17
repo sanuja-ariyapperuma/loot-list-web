@@ -1,9 +1,10 @@
 // Utilities
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { Brand, LootItem } from '../types/list.type'
 
 export const useListStore = defineStore('list', () => {
-  const list = ref([
+  const list = ref<LootItem[]>([
     {
       id: 1,
       title: "Dish soap",
@@ -89,7 +90,7 @@ export const useListStore = defineStore('list', () => {
       tags: ["kitchen"],
     },
   ])
-  const brands = ref([
+  const brands = ref<Brand[]>([
     {
       id: 1,
       title: "Anchor",

@@ -75,7 +75,7 @@
 
 <script lang="ts" setup>
 import { useListStore } from "@/stores/list";
-import { NewLootItem } from "@/types/list.type";
+import { NewLootItem, LootItem } from "@/types/list.type";
 
 const store = useListStore();
 
