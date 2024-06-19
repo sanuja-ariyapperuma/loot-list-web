@@ -9,7 +9,7 @@
     <v-list-tile-sub-title>
       <v-chip class="mr-2" color="pink" label>
         <v-icon icon="mdi-shape" start></v-icon>
-        {{ brands.find((brand) => brand.id === item.brandId).title }}
+        {{ brands?.find((brand) => brand.id === item.brandId)?.title }}
       </v-chip>
       <v-chip v-for="tag in item.tags" :key="tag" class="mr-2" color="primary">
         {{ tag }}
@@ -30,7 +30,8 @@
 </template>
 
 <script lang="ts" setup>
-import { LootItem } from "../types/list.type";
+import { PropType } from "vue";
+import { Brand, LootItem } from "../types/list.type";
 
 const { list, brands, isEdit } =
   defineProps({

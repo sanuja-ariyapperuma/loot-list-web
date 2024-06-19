@@ -7,8 +7,14 @@ export type NewLootItem = {
 }
 
 export type LootItem = {
-  id: string;
+  id: number;
   title: string;
-  brandId: string;
+  brandId: number;
+  isActive?: boolean;
   tags: string[];
 };
+
+export type Brand = {
+  id: number,
+  title: string,
+}
